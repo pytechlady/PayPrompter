@@ -130,7 +130,6 @@ $('#exampleModal form').submit(function() {
               type: "pie",
               showInLegend: true,
               startAngle: -90,
-              yValueFormatString: "#,###'%'",
               dataPoints: [
                   { label: "Paid", legendText: "paid", y: datapoints.paid_invoices_count },
                   { label: "Unpaid", legendText: "unpaid", y: datapoints.unpaid_invoices_count }
@@ -184,12 +183,10 @@ if (!sales_data || typeof sales_data !== 'object') {
             text: "Expected Total Payment Per Month"
         },
         axisY: {
-            suffix: "%"
+            prefix: "£"
         },
         data: [{
-            type: "spline",
-            markerSize: 0,
-            yValueFormatString: "#,##0.0",
+            type: "column",
             dataPoints: sales_dataPoints
         }]
     });
