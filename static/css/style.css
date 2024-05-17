@@ -1,0 +1,9 @@
+.main-page {
+    background-image: url('../images/giphy.gif');
+    background-repeat: no-repeat;
+    background-size:contain;
+    background-position:center;   
+}
+.input-group-append {
+    cursor: pointer;
+  }

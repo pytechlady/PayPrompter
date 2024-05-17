@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+
+{% load static %}
+
+{% block title %} Home Page {% endblock %}
+
+{% block css %}
+<link rel="stylesheet" href="{% static 'css/style.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="vh-100 main-page">
+    <div class="container">
+        {% if user is not None or user != "AnonymousUser" %}
+    <center class="pt-4">
+        <a href="{% url 'dashboard' %}">
+<button type="button" class="d-inline p-3 btn btn-primary">Dashboard</button>
+    </a>
+    </center>
+    {% else %}
+    <center class="pt-4">
+       <a href="{% url 'signup' %}">
+                <button type="button" class="d-inline p-3 btn btn-primary">Create Account</button>
+            </a>
+        <a href="{% url 'login' %}">
+    <button type="button" class="d-inline p-3 btn btn-primary">Login</button>
+        </a> 
+</center>
+{% endif %}
+    </div>
+    </div>
+{% endblock %}

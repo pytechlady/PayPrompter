@@ -1,0 +1,204 @@
+{% extends 'sidenav.html' %} 
+
+{% load static %} 
+
+{% block title %} Dashboard {%endblock %} 
+
+{% block content %}
+<div class="container-fluid pt-5 pb-5">
+  {% include 'core/messages.html' %}
+  <div class="row">
+    <div class="col-md-8">
+      <div class="card px-5 py-4">
+        <div class="card-body">
+          <h5 class="card-title">All invoices</h5>
+          <div class="container">
+            {% include 'core/includes/invoice_table.html' %}
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="card p-5">
+        <div class="card-body">
+          <div id="chartContainer" style="width: 100%; height: 360px;"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="pt-5 pb-5">
+  <div id="chartContainer2" style="height: 300px; width: 100%;"></div>
+  </div>
+</div>
+{% endblock %} 
+{% block js %}
+<script type="text/javascript">
+// Function to get CSRF token from the cookie
+function getCookie(name) {
+    var cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        var cookies = document.cookie.split(';');
+        for (var i = 0; i < cookies.length; i++) {
+            var cookie = cookies[i].trim();
+            // Does this cookie string begin with the name we want?
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    console.log(cookieValue);
+    return cookieValue;
+}
+
+$(document).on('click', '.edit-btn', function() {
+    var invoicePk = $(this).data('invoice-pk');
+    var url_link = "{% url 'get_invoice' 0 %}".replace('0', invoicePk);
+    $.ajax({
+        url: url_link,
+        type: 'GET',
+        beforeSend: function(xhr) {
+            xhr.setRequestHeader('X-CSRFToken', getCookie('csrftoken'));
+        },
+        success: function(response) {
+            var invoice_id = JSON.parse(response.invoice_data)[0].pk;
+            var invoiceData = JSON.parse(response.invoice_data)[0].fields;
+            $('#exampleModal input[name="email"]').val(invoiceData.email);
+            $('#exampleModal input[name="fullname"]').val(invoiceData.name);
+            $('#exampleModal input[name="invoice_number"]').val(invoiceData.invoice_number);
+            $('#exampleModal input[name="amount"]').val(invoiceData.amount);
+            $('#exampleModal input[name="due_date"]').val(invoiceData.due_date);
+            $('#exampleModal select[name="is_paid"]').val(invoiceData.is_paid ? "1" : "0");
+            $('#exampleModal input[name="invoice_pk"]').val(invoice_id);
+            $('#exampleModal textarea[name="description"]').val(invoiceData.description);
+
+            $('#exampleModal').modal('show');
+        },
+        error: function(xhr, status, error) {
+            console.error(xhr.responseText);
+        }
+    });
+});
+
+// Bind form submission event to the form containing the input fields
+$('#exampleModal form').submit(function() {
+    var invoicePk = $('#modal-invoice-pk').val();
+    var formData = {
+        email: $('#exampleModal input[name="email"]').val(),
+        name: $('#exampleModal input[name="fullname"]').val(),
+        invoice_number: $('#exampleModal input[name="invoice_number"]').val(),
+        amount: $('#exampleModal input[name="amount"]').val(),
+        is_paid: $('#exampleModal select[name="is_paid"]').val(),
+        due_date: $('#exampleModal input[name="due_date"]').val(),
+        description: $('#exampleModal textarea[name="description"]').val()
+    };
+    $.ajax({
+        url: "{% url 'get_invoice' 0 %}".replace('0', invoicePk),
+        type: 'PATCH',
+        
+        data: formData,
+        beforeSend: function(xhr) {
+            xhr.setRequestHeader('X-CSRFToken', getCookie('csrftoken'));
+        },
+        success: function(response) {
+            console.log(response);
+            $('#exampleModal').modal('hide');
+            $('body').removeClass('modal-open');
+            $('.modal-backdrop').remove();
+        },
+        error: function(error) {
+            console.log(error);
+            $('#exampleModal').modal('hide');
+            $('body').removeClass('modal-open');
+            $('.modal-backdrop').remove();
+        }
+    });
+});
+</script>
+<script>
+  window.onload = function () {
+      var datapoints = {{ datapoints | safe }};
+      {% comment %} console.log(datapoints); {% endcomment %}
+      var chart = new CanvasJS.Chart("chartContainer", {
+          theme: "light2",
+          exportEnabled: true,
+          animationEnabled: true,
+          title:{
+              text: "Payment Status"
+          },
+          data: [{
+              type: "pie",
+              showInLegend: true,
+              startAngle: -90,
+              yValueFormatString: "#,###'%'",
+              dataPoints: [
+                  { label: "Paid", legendText: "paid", y: datapoints.paid_invoices_count },
+                  { label: "Unpaid", legendText: "unpaid", y: datapoints.unpaid_invoices_count }
+              ]
+          }]
+      });
+      
+      chart.render();
+
+// Parse JSON data from the template
+var sales_data = {{ sales_report_data|safe }};
+
+if (!sales_data || typeof sales_data !== 'object') {
+    console.error('Invalid sales data:', sales_data);
+    // Handle error
+} else {
+    var sales_dataPoints = [];
+
+    // Extract sales per month data
+    var sales_per_month = sales_data.sales_per_month;
+    if (!sales_per_month || typeof sales_per_month !== 'object') {
+        console.error('Invalid sales_per_month attribute:', sales_per_month);
+        // Handle error
+    } else {
+        // Iterate over month-year pairs
+        for (var year in sales_per_month) {
+            if (sales_per_month.hasOwnProperty(year)) {
+                for (var month in sales_per_month[year]) {
+                    if (sales_per_month[year].hasOwnProperty(month)) {
+                        var label = month + ' ' + year;
+                        var y = parseFloat(sales_per_month[year][month]);
+                        console.log("Label:", label, "Y:", y);
+                        sales_dataPoints.push({
+                            label: label,
+                            y: y
+                        });
+                    }
+                }
+            }
+        }
+    }
+
+    {% comment %} console.log(sales_dataPoints); {% endcomment %}
+
+    // Render chart
+    var chart2 = new CanvasJS.Chart("chartContainer2", {
+        theme: "light1",
+        animationEnabled: true,
+        exportEnabled: true,
+        title: {
+            text: "Expected Total Payment Per Month"
+        },
+        axisY: {
+            suffix: "%"
+        },
+        data: [{
+            type: "spline",
+            markerSize: 0,
+            yValueFormatString: "#,##0.0",
+            dataPoints: sales_dataPoints
+        }]
+    });
+    chart2.render();
+}
+
+
+  }
+</script>
+
+{% endblock %}
+

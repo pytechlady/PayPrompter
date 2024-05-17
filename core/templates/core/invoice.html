@@ -1,0 +1,19 @@
+{% extends 'sidenav.html' %}
+
+{% load static %}
+
+{% block title %}Invoice{% endblock %}
+
+{% block content %}
+<div class="container pt-5">
+    <div class="row">
+        {% include 'core/messages.html' %}
+        <div class="col-sm-12 col-md-6 col-lg-6 mb-3">
+            {% include 'core/includes/create_invoice.html' %}
+        </div>
+        <div class="col-sm-12 col-md-6 col-lg-6">
+            {% include 'core/includes/upload_invoice.html' %}
+        </div>
+      </div>
+</div>
+{% endblock %}

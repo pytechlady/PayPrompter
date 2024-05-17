@@ -1,0 +1,127 @@
+<table class="table align-middle mb-0 bg-white">
+    <thead class="bg-light">
+      <tr>
+        <th>Name / Email</th>
+        <th>Amount / Invoice no</th>
+        <th>Payment Status</th>
+        <th>Due Date</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+        {% if invoices_result %}
+        {% for invoice in invoices_result %}
+      <tr>
+        <td>
+            <div>
+              <p class="fw-bold mb-1">{{ invoice.fields.name }}</p>
+              <p class="text-muted mb-0">{{ invoice.fields.email }}</p>
+          </div>
+        </td>
+        <td>
+          <p class="text-normal mb-1">£{{ invoice.fields.amount }}</p>
+          <p class="text-muted mb-0">{{ invoice.fields.invoice_number }}</p>
+        </td>
+
+        {% if invoice.fields.is_paid %}
+        <td>Paid</td>
+        {% else %}
+        <td>Unpaid</td>
+        {% endif %}
+        <td>{{ invoice.fields.due_date }}</td>
+        <td>
+          <button class="btn btn-link btn-sm btn-rounded edit-btn" data-invoice-pk="{{ invoice.pk }}" data-bs-toggle="modal" data-bs-target="#exampleModal">
+              Edit
+          </button>
+      </td>      
+      </tr>
+      {% endfor %}
+      {% else %}
+      <p class="fw-italic">You currently don't have any invoice.</p>
+      {% endif %}
+    </tbody>
+  </table>
+  <div class="mt-4">
+    <nav aria-label="Page navigation example">
+        <ul class="pagination">
+            {% if page_number > 1 %}
+                <li class="page-item"><a class="page-link" href="?page=1">&laquo; first</a></li>
+                <li class="page-item me-2"><a class="page-link" href="?page={{ page_number|add:"-1" }}">Previous</a></li>
+            {% endif %}
+
+            <span class="page-item active me-3">
+                Page {{ page_number }} of {{ total_pages }}
+            </span>
+
+            {% if page_number < total_pages %}
+                <li class="page-item"><a class="page-link" href="?page={{ page_number|add:"1" }}">Next</a></li>
+                <li class="page-item"><a class="page-link" href="?page={{ total_pages }}">Last &raquo;</a></li>
+            {% endif %}
+        </ul>
+    </nav>
+</div>
+
+
+  <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h1 class="modal-title fs-5" id="exampleModalLabel">Update Invoice</h1>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <form>
+
+            <div class="mb-3">
+                <label for="exampleFormControlInput1" class="form-label">Email address</label>
+                <input type="email" class="form-control" id="exampleFormControlInput1" name="email">
+              </div>
+              <div class="mb-3">
+                <label for="exampleFormControlInput2" class="form-label">Name</label>
+                <input type="text" class="form-control" id="exampleFormControlInput2" name="fullname" disabled>
+              </div>
+              <div class="mb-3">
+                <label for="exampleFormControlInput3" class="form-label">Invoice Number</label>
+                <input type="text" class="form-control" id="exampleFormControlInput3" name="invoice_number" disabled>
+              </div>
+              <div class="mb-3">
+                <label for="exampleFormControlInput4" class="form-label">Amount</label>
+                <input step="0.01" type="number" class="form-control" id="exampleFormControlInput4" name="amount">
+              </div>
+              <div class="mb-3">
+                <label for="exampleFormControlTextarea1" class="form-label">Description</label>
+                <textarea class="form-control" id="exampleFormControlTextarea1" rows="3" name="description"></textarea>
+              </div>
+              <div class="mb-3">
+                <label for="datepicker" class="form-label">Due Date</label>
+                <div class="input-group date" id="datepicker">
+                <input type="text" class="form-control" name="due_date"/>
+                <span class="input-group-text bg-light d-block">
+                    <i class="fa fa-calendar"></i>
+                  </span>
+                </div>
+              </div>
+              <div class="mb-3">
+                <label for="exampleFormControlInput5" class="form-label">Payment Status</label>
+              <select class="form-select" aria-label="Default select example" id="exampleFormControlInput5" name="is_paid">
+                <option value="0">Unpaid</option>
+                <option value="1">Paid</option>
+              </select>
+            </div>
+            <input type="hidden" name="invoice_pk" id="modal-invoice-pk">
+        </form>
+        </div>
+        <div class="modal-footer">
+          <a href="{% url 'generate_invoice' 1 %}">
+          <button type="button" class="btn btn-success">Download</button>
+          </a>
+          <form enctype='multipart/form-data'>
+          <button type="submit" data-invoice-pk="{{ invoice.pk }}" class="btn btn-primary update-btn">Save changes</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  

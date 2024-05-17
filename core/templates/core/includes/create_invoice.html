@@ -1,0 +1,46 @@
+<form action="{% url 'create_invoice' %}" method="POST" enctype='multipart/form-data'>
+    {% csrf_token %}
+<div class="card p-4">
+    <div class="card-body">
+      <h5 class="card-title text-center text-uppercase fw-bold text-decoration-underline mb-4">Create New Invoice</h5>
+      <div class="mb-3">
+        <label for="exampleFormControlInput1" class="form-label">Email address</label>
+        <input type="email" class="form-control" id="exampleFormControlInput1" placeholder="name@example.com" name="email">
+      </div>
+      <div class="mb-3">
+        <label for="exampleFormControlInput2" class="form-label">Name</label>
+        <input type="text" class="form-control" id="exampleFormControlInput2" placeholder="Full name" name="name">
+      </div>
+      <div class="mb-3">
+        <label for="exampleFormControlInput3" class="form-label">Invoice Number</label>
+        <input type="text" class="form-control" id="exampleFormControlInput3" placeholder="INV-001-20015" name="invoice_number">
+      </div>
+      <div class="mb-3">
+        <label for="exampleFormControlInput4" class="form-label">Amount</label>
+        <input step="0.01" type="number" class="form-control" id="exampleFormControlInput4" placeholder="5" name="amount">
+      </div>
+      <div class="mb-3">
+        <label for="exampleFormControlTextarea1" class="form-label">Description</label>
+        <textarea class="form-control" id="exampleFormControlTextarea1" rows="3" name="description"></textarea>
+      </div>
+     <div class="mb-3">
+        <label for="date" class="form-label">Due Date</label>
+        <div class="input-group date">
+        <input type="text" class="form-control" id="datepicker" placeholder="Select a date" name="due_date"/>
+        <span class="input-group-text bg-light d-block">
+            <i class="fa fa-calendar"></i>
+          </span>
+        </div>
+      </div>
+      <div class="mb-3">
+      <select class="form-select" aria-label="Default select example" name="is_paid">
+        <option selected>Payment Status</option>
+        <option value="0">Unpaid</option>
+        <option value="1">Paid</option>
+      </select>
+    </div>
+    <button class="btn btn-primary" type="submit">Save Invoice</button>
+    </div>
+  </div>
+</form>
+
